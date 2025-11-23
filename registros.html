@@ -3,73 +3,54 @@
 <head>
 <meta charset="UTF-8">
 <title>Registros de Préstamos</title>
-
 <style>
 body { font-family: Arial; background:#f4f4f4; padding:20px; }
-table { width:100%; border-collapse:collapse; background:white; margin-top:15px; }
+table { width:100%; border-collapse:collapse; background:white; }
 th, td { border:1px solid #999; padding:8px; text-align:center; }
 th { background:#333; color:white; }
-.btn-green { padding:6px 12px; background:#2e7d32; color:white; border:none; cursor:pointer; border-radius:5px; }
-.btn-red { padding:6px 12px; background:#c62828; color:white; border:none; cursor:pointer; border-radius:5px; }
-.filters { display:flex; gap:20px; margin-bottom:20px; }
-input, select { padding:8px; border-radius:5px; border:1px solid #777; }
+input, select { padding:8px; margin:10px 0; width:200px; }
+.btn { padding:6px 12px; background:#007bff; color:white; border:none; cursor:pointer; border-radius:5px; }
+.btn-danger { background:#c62828; }
+.btn-green { background:#2e7d32; }
 </style>
 </head>
-
 <body>
+
 <h1>Registros de Préstamos</h1>
 
-<!-- Buscador y filtros -->
-<div class="filters">
-    <input type="text" id="buscarAlumno" placeholder="Buscar por alumno..." onkeyup="cargar()">
-
-    <select id="filtroAula" onchange="cargar()">
-        <option value="">Filtrar por aula</option>
-    </select>
-</div>
+<input type="text" id="buscador" placeholder="Buscar alumno..." onkeyup="cargar()">
+<select id="filtroAula" onchange="cargar()">
+    <option value="">Todas las aulas</option>
+</select>
 
 <table>
 <thead>
 <tr>
-<th>Alumno</th>
-<th>Carrera</th>
-<th>Aula</th>
-<th>Hora</th>
-<th>Fecha</th>
-<th>Hora Registro</th>
-<th>Estado</th>
-<th>Borrar</th>
+<th>Alumno</th><th>Carrera</th><th>Aula</th><th>Hora</th><th>Fecha</th><th>Hora Registro</th><th>Devolver</th><th>Borrar</th>
 </tr>
 </thead>
-
 <tbody id="cuerpo"></tbody>
 </table>
 
 <script>
-// Cargar tabla
-function cargar() {
-    let datos = JSON.parse(localStorage.getItem("prestamos") || "[]");
-    let cuerpo = document.getElementById("cuerpo");
-    let busqueda = document.getElementById("buscarAlumno").value.toLowerCase();
-    let filtroAula = document.getElementById("filtroAula").value;
+function cargar(){
+    let datos = JSON.parse(localStorage.getItem('prestamos') || '[]');
+    let cuerpo = document.getElementById('cuerpo');
+    let busqueda = document.getElementById("buscador").value.toLowerCase();
+    let aulaFiltro = document.getElementById("filtroAula").value;
 
-    cuerpo.innerHTML = "";
+    cuerpo.innerHTML="";
 
-    // Rellenar lista de aulas
-    let aulasSelect = document.getElementById("filtroAula");
-    aulasSelect.innerHTML = `<option value="">Filtrar por aula</option>`;
+    // actualizar opciones de filtro
     let aulasUnicas = [...new Set(datos.map(d => d.aula))];
-    aulasUnicas.forEach(a => aulasSelect.innerHTML += `<option value="${a}">${a}</option>`);
-    aulasSelect.value = filtroAula;
+    document.getElementById("filtroAula").innerHTML =
+        "<option value=''>Todas las aulas</option>" +
+        aulasUnicas.map(a => `<option value="${a}">${a}</option>`).join("");
 
-    // Filtros
-    datos = datos.filter(r =>
-        r.alumno.toLowerCase().includes(busqueda) &&
-        (filtroAula === "" || r.aula === filtroAula)
-    );
-
-    // Mostrar registros
-    datos.forEach((r, i) => {
+    datos
+    .filter(r => r.alumno.toLowerCase().includes(busqueda))
+    .filter(r => aulaFiltro === "" || r.aula === aulaFiltro)
+    .forEach((r,i)=>{
         cuerpo.innerHTML += `
         <tr>
             <td>${r.alumno}</td>
@@ -78,35 +59,24 @@ function cargar() {
             <td>${r.hora}</td>
             <td>${r.fecha}</td>
             <td>${r.horaRegistro}</td>
-            <td>
-                ${r.devuelto 
-                    ? "<span style='color:green; font-weight:bold;'>Devuelto</span>"
-                    : `<button class="btn-green" onclick="devolver(${i})">Proyector de vuelta</button>`
-                }
-            </td>
-            <td>
-                <button class="btn-red" onclick="borrar(${i})">Eliminar</button>
-            </td>
+            <td>${r.devuelto ? "Devuelto" : `<button class='btn-green' onclick='devolver(${i})'>Devolver</button>`}</td>
+            <td><button class='btn-danger' onclick='borrar(${i})'>Borrar</button></td>
         </tr>`;
     });
 }
 
-// Marcar devuelto
-function devolver(i) {
-    let datos = JSON.parse(localStorage.getItem("prestamos") || "[]");
+function devolver(i){
+    let datos = JSON.parse(localStorage.getItem('prestamos'));
     datos[i].devuelto = true;
-    localStorage.setItem("prestamos", JSON.stringify(datos));
+    localStorage.setItem('prestamos', JSON.stringify(datos));
     cargar();
 }
 
-// Borrar registro
-function borrar(i) {
-    let datos = JSON.parse(localStorage.getItem("prestamos") || "[]");
-    if(confirm("¿Deseas eliminar este registro?")){
-        datos.splice(i, 1);
-        localStorage.setItem("prestamos", JSON.stringify(datos));
-        cargar();
-    }
+function borrar(i){
+    let datos = JSON.parse(localStorage.getItem('prestamos'));
+    datos.splice(i,1);
+    localStorage.setItem('prestamos', JSON.stringify(datos));
+    cargar();
 }
 
 cargar();
