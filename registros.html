@@ -6,17 +6,27 @@
 
 <style>
 body { font-family: Arial; background:#f4f4f4; padding:20px; }
-table { width:100%; border-collapse:collapse; background:white; }
+table { width:100%; border-collapse:collapse; background:white; margin-top:15px; }
 th, td { border:1px solid #999; padding:8px; text-align:center; }
 th { background:#333; color:white; }
-.btn { padding:6px 12px; background:#007bff; color:white; border:none; cursor:pointer; border-radius:5px; }
-.btn-danger { background:#c62828; }
-.btn-green { background:#2e7d32; }
+.btn-green { padding:6px 12px; background:#2e7d32; color:white; border:none; cursor:pointer; border-radius:5px; }
+.btn-red { padding:6px 12px; background:#c62828; color:white; border:none; cursor:pointer; border-radius:5px; }
+.filters { display:flex; gap:20px; margin-bottom:20px; }
+input, select { padding:8px; border-radius:5px; border:1px solid #777; }
 </style>
 </head>
 
 <body>
 <h1>Registros de Préstamos</h1>
+
+<!-- Buscador y filtros -->
+<div class="filters">
+    <input type="text" id="buscarAlumno" placeholder="Buscar por alumno..." onkeyup="cargar()">
+
+    <select id="filtroAula" onchange="cargar()">
+        <option value="">Filtrar por aula</option>
+    </select>
+</div>
 
 <table>
 <thead>
@@ -27,7 +37,8 @@ th { background:#333; color:white; }
 <th>Hora</th>
 <th>Fecha</th>
 <th>Hora Registro</th>
-<th>Devolver</th>
+<th>Estado</th>
+<th>Borrar</th>
 </tr>
 </thead>
 
@@ -35,35 +46,29 @@ th { background:#333; color:white; }
 </table>
 
 <script>
-// ===============================
-// CONFIG: IP del administrador
-// ===============================
-let adminIP = "127.0.0.1"; // <-- CAMBIAR A LA IP REAL
-
-// ===============================
-// VERIFICACIÓN DE IP
-// ===============================
-fetch("https://api.ipify.org?format=json")
-    .then(r => r.json())
-    .then(data => {
-        if (data.ip !== adminIP) {
-            document.body.innerHTML = `
-                <h2 style="text-align:center; margin-top:50px;">
-                    ❌ Acceso denegado <br><br>
-                    Solo el administrador puede ver esta página.
-                </h2>`;
-        }
-    });
-
-// ===============================
-// Cargar registros en la tabla
-// ===============================
+// Cargar tabla
 function cargar() {
     let datos = JSON.parse(localStorage.getItem("prestamos") || "[]");
     let cuerpo = document.getElementById("cuerpo");
+    let busqueda = document.getElementById("buscarAlumno").value.toLowerCase();
+    let filtroAula = document.getElementById("filtroAula").value;
 
     cuerpo.innerHTML = "";
 
+    // Rellenar lista de aulas
+    let aulasSelect = document.getElementById("filtroAula");
+    aulasSelect.innerHTML = `<option value="">Filtrar por aula</option>`;
+    let aulasUnicas = [...new Set(datos.map(d => d.aula))];
+    aulasUnicas.forEach(a => aulasSelect.innerHTML += `<option value="${a}">${a}</option>`);
+    aulasSelect.value = filtroAula;
+
+    // Filtros
+    datos = datos.filter(r =>
+        r.alumno.toLowerCase().includes(busqueda) &&
+        (filtroAula === "" || r.aula === filtroAula)
+    );
+
+    // Mostrar registros
     datos.forEach((r, i) => {
         cuerpo.innerHTML += `
         <tr>
@@ -79,13 +84,14 @@ function cargar() {
                     : `<button class="btn-green" onclick="devolver(${i})">Proyector de vuelta</button>`
                 }
             </td>
+            <td>
+                <button class="btn-red" onclick="borrar(${i})">Eliminar</button>
+            </td>
         </tr>`;
     });
 }
 
-// ===============================
-// Marcar como devuelto
-// ===============================
+// Marcar devuelto
 function devolver(i) {
     let datos = JSON.parse(localStorage.getItem("prestamos") || "[]");
     datos[i].devuelto = true;
@@ -93,7 +99,16 @@ function devolver(i) {
     cargar();
 }
 
-// Ejecutar carga al inicio
+// Borrar registro
+function borrar(i) {
+    let datos = JSON.parse(localStorage.getItem("prestamos") || "[]");
+    if(confirm("¿Deseas eliminar este registro?")){
+        datos.splice(i, 1);
+        localStorage.setItem("prestamos", JSON.stringify(datos));
+        cargar();
+    }
+}
+
 cargar();
 </script>
 
