@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<title>Préstamo de Proyectores - ITO</title>
+<style>
+body { font-family: Arial, sans-serif; background:#eef1f5; padding:20px; }
+.container { max-width:600px; margin:auto; background:white; padding:20px; border-radius:10px; box-shadow:0 0 10px rgba(0,0,0,0.1); }
+h1 { text-align:center; margin-bottom:20px; }
+label { font-weight:bold; }
+input, select { width:100%; padding:10px; margin-bottom:15px; border:1px solid #999; border-radius:5px; }
+.btn { width:100%; padding:12px; background:#007bff; color:white; border:none; border-radius:5px; cursor:pointer; font-size:16px; }
+.alert { background:#c62828; color:white; padding:10px; border-radius:5px; margin-bottom:15px; display:none; }
+</style>
+</head>
+<body>
+<div class="container">
+<h1>Bienvenido al Sistema de Préstamo de Proyectores del Instituto Tecnológico de Oaxaca</h1>
+<div id="alerta" class="alert">El proyector ya está ocupado en esta aula y en esta hora</div>
+
+
+<label>Nombre del Alumno:</label>
+<input type="text" id="alumno">
+
+
+<label>Número de Control:</label>
+<input type="text" id="control">
+
+
+<label>Carrera:</label>
+<select id="carrera">
+<option>Ingeniería en Sistemas Computacionales</option>
+<option>Ingeniería Civil</option>
+<option>Ingeniería Química</option>
+<option>Ingeniería Industrial</option>
+<option>Ingeniería en Gestión Empresarial</option>
+<option>Ingeniería Mecánica</option>
+<option>Ingeniería Eléctrica</option>
+<option>Ingeniería Electrónica</option>
+<option>Licenciatura en Administración</option>
+<option>Licenciatura en Contador Público</option>
+</select>
+
+
+<label>Profesor:</label>
+<input type="text" id="profesor">
+
+
+<label>Aula:</label>
+<input type="text" id="aula">
+
+
+<label>Hora de clase:</label>
+</html>
