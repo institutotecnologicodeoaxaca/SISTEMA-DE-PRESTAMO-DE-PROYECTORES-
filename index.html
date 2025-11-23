@@ -18,14 +18,11 @@ input, select { width:100%; padding:10px; margin-bottom:15px; border:1px solid #
 <h1>Bienvenido al Sistema de Préstamo de Proyectores del Instituto Tecnológico de Oaxaca</h1>
 <div id="alerta" class="alert">El proyector ya está ocupado en esta aula y en esta hora</div>
 
-
 <label>Nombre del Alumno:</label>
 <input type="text" id="alumno">
 
-
 <label>Número de Control:</label>
 <input type="text" id="control">
-
 
 <label>Carrera:</label>
 <select id="carrera">
@@ -41,14 +38,78 @@ input, select { width:100%; padding:10px; margin-bottom:15px; border:1px solid #
 <option>Licenciatura en Contador Público</option>
 </select>
 
-
 <label>Profesor:</label>
 <input type="text" id="profesor">
-
 
 <label>Aula:</label>
 <input type="text" id="aula">
 
-
 <label>Hora de clase:</label>
+<select id="hora"></select>
+
+<button class="btn" onclick="registrar()">Registrar Préstamo</button>
+</div>
+
+<script>
+// HORAS DISPONIBLES
+let horas = [
+"7am - 8am","8am - 9am","9am - 10am","10am - 11am",
+"11am - 12pm","12pm - 1pm","1pm - 2pm","2pm - 3pm",
+"3pm - 4pm","4pm - 5pm","5pm - 6pm","6pm - 7pm","7pm - 8pm"
+];
+
+const horaSel = document.getElementById('hora');
+horas.forEach(h => horaSel.innerHTML += `<option>${h}</option>`);
+
+// LISTA DE REGISTROS GUARDADOS
+let registros = [];
+
+function registrar(){
+    let alumno = document.getElementById('alumno').value.trim();
+    let control = document.getElementById('control').value.trim();
+    let carrera = document.getElementById('carrera').value;
+    let profesor = document.getElementById('profesor').value.trim();
+    let aula = document.getElementById('aula').value.trim();
+    let hora = document.getElementById('hora').value;
+
+    let alerta = document.getElementById('alerta');
+
+    // VALIDAR CAMPOS VACÍOS
+    if(alumno === "" || control === "" || profesor === "" || aula === ""){
+        alerta.innerText = "Por favor completa todos los campos";
+        alerta.style.display = "block";
+        return;
+    }
+
+    // VALIDACIÓN: ¿YA EXISTE UN PRÉSTAMO EN LA MISMA AULA Y HORA?
+    let conflicto = registros.some(r => r.aula === aula && r.hora === hora);
+
+    if(conflicto){
+        alerta.innerText = "El proyector ya está ocupado en esta aula y en esta hora";
+        alerta.style.display = "block";
+        return;
+    }
+
+    alerta.style.display = "none";
+
+    // GUARDAR REGISTRO
+    registros.push({
+        alumno,
+        control,
+        carrera,
+        profesor,
+        aula,
+        hora
+    });
+
+    alert("Préstamo registrado exitosamente");
+
+    // LIMPIAR CAMPOS
+    document.getElementById('alumno').value = "";
+    document.getElementById('control').value = "";
+    document.getElementById('profesor').value = "";
+    document.getElementById('aula').value = "";
+}
+</script>
+</body>
 </html>
