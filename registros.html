@@ -1,6 +1,9 @@
 <!DOCTYPE html>
+<html lang="es">
+<head>
 <meta charset="UTF-8">
 <title>Registros de Préstamos</title>
+
 <style>
 body { font-family: Arial; background:#f4f4f4; padding:20px; }
 table { width:100%; border-collapse:collapse; background:white; }
@@ -11,55 +14,88 @@ th { background:#333; color:white; }
 .btn-green { background:#2e7d32; }
 </style>
 </head>
+
 <body>
 <h1>Registros de Préstamos</h1>
+
 <table>
 <thead>
 <tr>
-<th>Alumno</th><th>Carrera</th><th>Aula</th><th>Hora</th><th>Fecha</th><th>Hora Registro</th><th>Devolver</th>
+<th>Alumno</th>
+<th>Carrera</th>
+<th>Aula</th>
+<th>Hora</th>
+<th>Fecha</th>
+<th>Hora Registro</th>
+<th>Devolver</th>
 </tr>
 </thead>
+
 <tbody id="cuerpo"></tbody>
 </table>
 
-
 <script>
-let adminIP = "127.0.0.1"; // CAMBIAR
-fetch("https://api.ipify.org?format=json").then(r=>r.json()).then(data=>{
-if(data.ip !== adminIP){
-document.body.innerHTML = "<h2>Acceso denegado<br>Solo el administrador puede ver esta página.</h2>";
+// ===============================
+// CONFIG: IP del administrador
+// ===============================
+let adminIP = "127.0.0.1"; // <-- CAMBIAR A LA IP REAL
+
+// ===============================
+// VERIFICACIÓN DE IP
+// ===============================
+fetch("https://api.ipify.org?format=json")
+    .then(r => r.json())
+    .then(data => {
+        if (data.ip !== adminIP) {
+            document.body.innerHTML = `
+                <h2 style="text-align:center; margin-top:50px;">
+                    ❌ Acceso denegado <br><br>
+                    Solo el administrador puede ver esta página.
+                </h2>`;
+        }
+    });
+
+// ===============================
+// Cargar registros en la tabla
+// ===============================
+function cargar() {
+    let datos = JSON.parse(localStorage.getItem("prestamos") || "[]");
+    let cuerpo = document.getElementById("cuerpo");
+
+    cuerpo.innerHTML = "";
+
+    datos.forEach((r, i) => {
+        cuerpo.innerHTML += `
+        <tr>
+            <td>${r.alumno}</td>
+            <td>${r.carrera}</td>
+            <td>${r.aula}</td>
+            <td>${r.hora}</td>
+            <td>${r.fecha}</td>
+            <td>${r.horaRegistro}</td>
+            <td>
+                ${r.devuelto 
+                    ? "<span style='color:green; font-weight:bold;'>Devuelto</span>"
+                    : `<button class="btn-green" onclick="devolver(${i})">Proyector de vuelta</button>`
+                }
+            </td>
+        </tr>`;
+    });
 }
-});
 
-
-function cargar(){
-let datos = JSON.parse(localStorage.getItem('prestamos') || '[]');
-let cuerpo = document.getElementById('cuerpo');
-cuerpo.innerHTML="";
-datos.forEach((r,i)=>{
-cuerpo.innerHTML += `
-<tr>
-<td>${r.alumno}</td>
-<td>${r.carrera}</td>
-<td>${r.aula}</td>
-<td>${r.hora}</td>
-<td>${r.fecha}</td>
-<td>${r.horaRegistro}</td>
-<td>${r.devuelto ? "Devuelto" : `<button class='btn-green' onclick='devolver(${i})'>Proyector de vuelta</button>`}</td>
-</tr>`;
-});
+// ===============================
+// Marcar como devuelto
+// ===============================
+function devolver(i) {
+    let datos = JSON.parse(localStorage.getItem("prestamos") || "[]");
+    datos[i].devuelto = true;
+    localStorage.setItem("prestamos", JSON.stringify(datos));
+    cargar();
 }
 
-
-function devolver(i){
-let datos = JSON.parse(localStorage.getItem('prestamos'));
-datos[i].devuelto = true;
-localStorage.setItem('prestamos', JSON.stringify(datos));
-cargar();
-}
-
-
+// Ejecutar carga al inicio
 cargar();
 </script>
+
 </body>
 </html>
