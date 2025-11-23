@@ -10,13 +10,15 @@ h1 { text-align:center; margin-bottom:20px; }
 label { font-weight:bold; }
 input, select { width:100%; padding:10px; margin-bottom:15px; border:1px solid #999; border-radius:5px; }
 .btn { width:100%; padding:12px; background:#007bff; color:white; border:none; border-radius:5px; cursor:pointer; font-size:16px; }
-.alert { background:#c62828; color:white; padding:10px; border-radius:5px; margin-bottom:15px; display:none; }
+.alert { background:#c62828; color:white; padding:10px; border-radius:5px; margin-bottom:15px; display:none; text-align:center; }
 </style>
 </head>
 <body>
+
 <div class="container">
-<h1>Bienvenido al Sistema de Préstamo de Proyectores del Instituto Tecnológico de Oaxaca</h1>
-<div id="alerta" class="alert">El proyector ya está ocupado en esta aula y en esta hora</div>
+<h1>Sistema de Préstamo de Proyectores</h1>
+
+<div id="alerta" class="alert">El proyector ya está ocupado en esa aula y hora.</div>
 
 <label>Nombre del Alumno:</label>
 <input type="text" id="alumno">
@@ -51,65 +53,59 @@ input, select { width:100%; padding:10px; margin-bottom:15px; border:1px solid #
 </div>
 
 <script>
-// HORAS DISPONIBLES
-let horas = [
-"7am - 8am","8am - 9am","9am - 10am","10am - 11am",
-"11am - 12pm","12pm - 1pm","1pm - 2pm","2pm - 3pm",
-"3pm - 4pm","4pm - 5pm","5pm - 6pm","6pm - 7pm","7pm - 8pm"
-];
-
+// Generar horas
+let horas = ["7am - 8am","8am - 9am","9am - 10am","10am - 11am","11am - 12pm","12pm - 1pm","1pm - 2pm","2pm - 3pm","3pm - 4pm","4pm - 5pm","5pm - 6pm","6pm - 7pm","7pm - 8pm"];
 const horaSel = document.getElementById('hora');
 horas.forEach(h => horaSel.innerHTML += `<option>${h}</option>`);
 
-// LISTA DE REGISTROS GUARDADOS
-let registros = [];
-
+// Registrar préstamo
 function registrar(){
-    let alumno = document.getElementById('alumno').value.trim();
-    let control = document.getElementById('control').value.trim();
+    let alumno = document.getElementById('alumno').value;
+    let control = document.getElementById('control').value;
     let carrera = document.getElementById('carrera').value;
-    let profesor = document.getElementById('profesor').value.trim();
-    let aula = document.getElementById('aula').value.trim();
+    let profesor = document.getElementById('profesor').value;
+    let aula = document.getElementById('aula').value;
     let hora = document.getElementById('hora').value;
 
-    let alerta = document.getElementById('alerta');
-
-    // VALIDAR CAMPOS VACÍOS
-    if(alumno === "" || control === "" || profesor === "" || aula === ""){
-        alerta.innerText = "Por favor completa todos los campos";
-        alerta.style.display = "block";
+    if(!alumno || !control || !profesor || !aula){
+        alert("Por favor llena todos los campos.");
         return;
     }
 
-    // VALIDACIÓN: ¿YA EXISTE UN PRÉSTAMO EN LA MISMA AULA Y HORA?
-    let conflicto = registros.some(r => r.aula === aula && r.hora === hora);
+    let prestamos = JSON.parse(localStorage.getItem('prestamos') || '[]');
 
-    if(conflicto){
-        alerta.innerText = "El proyector ya está ocupado en esta aula y en esta hora";
-        alerta.style.display = "block";
+    // Validar si ya está ocupado
+    let ocupado = prestamos.some(p => p.aula === aula && p.hora === hora && !p.devuelto);
+
+    if(ocupado){
+        document.getElementById('alerta').style.display = "block";
         return;
     }
 
-    alerta.style.display = "none";
+    document.getElementById('alerta').style.display = "none";
 
-    // GUARDAR REGISTRO
-    registros.push({
+    let fechaHoy = new Date().toLocaleDateString();
+    let horaReg = new Date().toLocaleTimeString();
+
+    let nuevo = {
         alumno,
         control,
         carrera,
         profesor,
         aula,
-        hora
-    });
+        hora,
+        fecha: fechaHoy,
+        horaRegistro: horaReg,
+        devuelto: false
+    };
 
-    alert("Préstamo registrado exitosamente");
+    prestamos.push(nuevo);
+    localStorage.setItem('prestamos', JSON.stringify(prestamos));
 
-    // LIMPIAR CAMPOS
-    document.getElementById('alumno').value = "";
-    document.getElementById('control').value = "";
-    document.getElementById('profesor').value = "";
-    document.getElementById('aula').value = "";
+    alert("Préstamo registrado correctamente.");
+    document.querySelectorAll("input").forEach(i => i.value = "");
 }
 </script>
+
 </body>
 </html>
